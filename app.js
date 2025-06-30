@@ -3,15 +3,10 @@ const express = require('express');
 const app = express();
 const port = 3000;
 const router = express.Router();
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-
-//app.get('/tasks', (req, res) => {
-//  return res.status(200).send(taskData.tasks);
-//})
 
 app.get('/tasks/:id', (req, res) => {
     console.log("id", req.params.id);
@@ -88,8 +83,8 @@ app.put('/tasks/:id', (req, res) => {
         title: req.body.title || taskFound.title,
         description: req.body.description || taskFound.description,
     };
-
-    taskData.tasks.push(newTask);
+    taskData.tasks.splice(itemIndex, 1, newTask);
+    
     return res.status(200).send(newTask);
 })
 
@@ -110,8 +105,8 @@ app.delete('/tasks/:id', (req, res) => {
             message: 'task not found',
         });
     }
-    taskData.tasks.pop()
 
+    taskData.tasks.splice(itemIndex, 1);
     return res.status(200).send({
         success: 'true',
         message: 'Task deleted successfuly',
