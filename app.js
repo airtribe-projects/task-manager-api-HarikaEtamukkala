@@ -1,9 +1,124 @@
+const taskData = require('./task.json');
 const express = require('express');
 const app = express();
 const port = 3000;
+const router = express.Router();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+
+app.get('/tasks', (req, res) => {
+    
+    return res.status(200).send(taskData.tasks);
+})
+
+app.get('/tasks/:id', (req, res) => {
+    console.log("id",req.params.id);
+    const taskId = req.params.id;
+    const task = taskData.tasks.find(t => t.id === parseInt(taskId));
+    if (!task) {
+        return res.status(404).send({ "message": `Task: ${taskId} not found` })
+    }
+    res.status(200).send(task);
+})
+
+app.post('/tasks', (req, res) => {
+    console.log(req.body.completed instanceof Boolean);
+    console.log(req.body.completed );
+    if (!req.body.title) {
+        return res.status(400).send({
+            success: 'false',
+            message: 'title is required',
+        });
+    } else if (!req.body.description) {
+        return res.status(400).send({
+            success: 'false',
+            message: 'description is required',
+        });
+    }
+    else if (typeof req.body.completed !== 'boolean'  ) {
+        return res.status(400).send({
+            success: 'false',
+            message: 'completed is boolean',
+        });
+    }
+    const task = req.body;
+    task.id = taskData.tasks.length+1;
+    taskData.tasks.push(task);
+    return res.status(201).send(task);
+})
+
+app.put('/tasks/:id', (req, res) => {
+    let taskFound;
+    let itemIndex;
+    let id = req.params.id;
+    taskData.tasks.map((task, index) => {
+        
+        if (task.id == id) {
+            taskFound = task;
+            itemIndex = index;
+        }
+    });
+
+    if (!taskFound) {
+        return res.status(404).send({
+            success: 'false',
+            message: 'task not found',
+        });
+    }
+    if (!req.body.title) {
+        return res.status(400).send({
+            success: 'false',
+            message: 'title is required',
+        });
+    } else if (!req.body.description) {
+        return res.status(400).send({
+            success: 'false',
+            message: 'description is required',
+        });
+    }else if (typeof req.body.completed !== 'boolean'  ) {
+        return res.status(400).send({
+            success: 'false',
+            message: 'completed is boolean',
+        });
+    }
+
+    const newTask = {
+        id: taskFound.id,
+        title: req.body.title || taskFound.title,
+        description: req.body.description || taskFound.description,
+    };
+
+    taskData.tasks.push(newTask);
+    return res.status(200).send(newTask);
+})
+
+app.delete('/tasks/:id', (req, res) => {
+   let id = req.body.id;
+    let taskFound;
+    let itemIndex;
+    taskData.tasks.map((task, index) => {
+        if (task.id == id) {
+            taskFound = task;
+            itemIndex = index;
+        }
+    });
+
+    if (!taskFound) {
+        return res.status(404).send({
+            success: 'false',
+            message: 'task not found',
+        });
+    }
+    taskData.tasks.pop()
+
+    return res.status(200).send({
+        success: 'true',
+        message: 'Task deleted successfuly',
+    });
+});
 
 app.listen(port, (err) => {
     if (err) {
