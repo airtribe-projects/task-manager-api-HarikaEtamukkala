@@ -24,7 +24,7 @@ app.get('/tasks/:id', (req, res) => {
 })
 
 app.post('/tasks', (req, res) => {
-  
+
     if (!req.body.title) {
         return res.status(400).send({
             success: 'false',
@@ -121,11 +121,23 @@ app.delete('/tasks/:id', (req, res) => {
 app.get('/tasks', (req, res) => {
     let filteredTasks = taskData.tasks;
     const completedQuery = req.query.completed;
-   
+
     if (completedQuery !== undefined) {
-       
+
         const isCompleted = completedQuery === 'true';
         filteredTasks = taskData.tasks.filter(task => task.completed === isCompleted);
+    }
+
+    res.status(200).send(filteredTasks);
+})
+
+app.get('/tasks/priority/:level', (req, res) => {
+    let filteredTasks = taskData.tasks;
+    const level = req.params.level;
+
+    if (level !== undefined) {
+
+        filteredTasks = taskData.tasks.filter(task => task.priority === level);
     }
 
     res.status(200).send(filteredTasks);
