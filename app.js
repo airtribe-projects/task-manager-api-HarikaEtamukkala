@@ -9,13 +9,12 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
-app.get('/tasks', (req, res) => {
-    
-    return res.status(200).send(taskData.tasks);
-})
+//app.get('/tasks', (req, res) => {
+//  return res.status(200).send(taskData.tasks);
+//})
 
 app.get('/tasks/:id', (req, res) => {
-    console.log("id",req.params.id);
+    console.log("id", req.params.id);
     const taskId = req.params.id;
     const task = taskData.tasks.find(t => t.id === parseInt(taskId));
     if (!task) {
@@ -25,8 +24,7 @@ app.get('/tasks/:id', (req, res) => {
 })
 
 app.post('/tasks', (req, res) => {
-    console.log(req.body.completed instanceof Boolean);
-    console.log(req.body.completed );
+  
     if (!req.body.title) {
         return res.status(400).send({
             success: 'false',
@@ -38,14 +36,14 @@ app.post('/tasks', (req, res) => {
             message: 'description is required',
         });
     }
-    else if (typeof req.body.completed !== 'boolean'  ) {
+    else if (typeof req.body.completed !== 'boolean') {
         return res.status(400).send({
             success: 'false',
             message: 'completed is boolean',
         });
     }
     const task = req.body;
-    task.id = taskData.tasks.length+1;
+    task.id = taskData.tasks.length + 1;
     taskData.tasks.push(task);
     return res.status(201).send(task);
 })
@@ -55,7 +53,7 @@ app.put('/tasks/:id', (req, res) => {
     let itemIndex;
     let id = req.params.id;
     taskData.tasks.map((task, index) => {
-        
+
         if (task.id == id) {
             taskFound = task;
             itemIndex = index;
@@ -78,7 +76,7 @@ app.put('/tasks/:id', (req, res) => {
             success: 'false',
             message: 'description is required',
         });
-    }else if (typeof req.body.completed !== 'boolean'  ) {
+    } else if (typeof req.body.completed !== 'boolean') {
         return res.status(400).send({
             success: 'false',
             message: 'completed is boolean',
@@ -96,7 +94,7 @@ app.put('/tasks/:id', (req, res) => {
 })
 
 app.delete('/tasks/:id', (req, res) => {
-   let id = req.body.id;
+    let id = req.params.id;
     let taskFound;
     let itemIndex;
     taskData.tasks.map((task, index) => {
@@ -120,6 +118,18 @@ app.delete('/tasks/:id', (req, res) => {
     });
 });
 
+app.get('/tasks', (req, res) => {
+    let filteredTasks = taskData.tasks;
+    const completedQuery = req.query.completed;
+   
+    if (completedQuery !== undefined) {
+       
+        const isCompleted = completedQuery === 'true';
+        filteredTasks = taskData.tasks.filter(task => task.completed === isCompleted);
+    }
+
+    res.status(200).send(filteredTasks);
+})
 app.listen(port, (err) => {
     if (err) {
         return console.log('Something bad happened', err);
